@@ -1,0 +1,134 @@
+body, .backgroundImage
+{
+	background-image: url("../images/background.jpg");
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-size: cover;
+}
+
+form
+{
+	text-align: center;
+}
+
+a
+{
+	color: black;
+}
+
+tr a
+{
+	color: blue;
+}
+
+.modal
+{
+	top: 45% !important;
+	transform: translate(0, -50%) !important;
+	padding-top: 0.75%;
+}
+
+#pageContainer
+{
+	margin-top: 0.5%;
+}
+
+.errorMessage
+{
+	color: red;
+}
+
+.successMessage
+{
+	color: green;
+}
+
+.transparent
+{
+	background-color: rgba(255, 255, 255, 0.65) !important;
+}
+
+.transparentBlack
+{
+	background-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+.transparentRed
+{
+	background-color: rgba(255, 90, 90, 0.6) !important;
+}
+
+.transparentGreen
+{
+	background-color: rgba(94, 199, 94, 0.6) !important;
+}
+
+.transparentOrange
+{
+	background-color: rgba(255, 152, 0, 0.6) !important;
+}
+
+.transparentYellow
+{
+	background-color: rgba(255, 255, 102, 0.6) !important;
+}
+
+.transparentButton
+{
+	background-color: rgba(255, 255, 255, 0.65) !important;
+	color: black !important;
+}
+
+.transparentButton i
+{
+	color: black !important;
+}
+
+.errorMessage i
+{
+	transform: translateY(0.25em);
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+
+}
+
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	background-color:#000000;
+}
+
+::-webkit-scrollbar-thumb {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+	background-color:#fff;
+}
+::-moz-scrollbar {
+    width: 12px;
+
+}
+
+::-moz-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	background-color:#FFFFFF;
+}
+
+::-moz-scrollbar-thumb {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+	background-color:#fff;
+}
+::-o-scrollbar {
+    width: 12px;
+
+}
+
+::-o-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+ 	background-color:#FFFFFF;
+}
+
+::-o-scrollbar-thumb {
+
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+	background-color:#00FF00;
+}
