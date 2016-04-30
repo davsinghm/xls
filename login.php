@@ -2,7 +2,7 @@
 
 	/*
 
-	Input: username
+	Input: rollNo
 	Input: password
 
 	Output: returnCode
@@ -12,25 +12,30 @@
 
 	$response = [];
 
-	if (isset($_POST["username"]) && isset($_POST["password"])) {
-
+	if (isset($_POST["rollNo"]) && isset($_POST["password"]))
+	{
 		require_once 'dbConnection.php';
 
 		$dbCon = new dbConnection();
 		$con = $dbCon->con;
 
-		$result = mysqli_query($con, "INSERT INTO users(Username, Password) VALUES('$_POST[username]', '$_POST[password]')");
+		$result = mysqli_query($con, "SELECT * FROM users WHERE rollNo='$_POST[rollNo]' AND password='$_POST[password]'");
 
 		if (!$result)
 		{
 			$response["returnCode"] = 0;
 			$response["extraInfo"] = "QUERY_FAILED";
-		} else {
+ 		} else if (mysqli_num_rows($result) != 0) {
 			$response["returnCode"] = 1;
-		}
-	} else {
+		} else {
 			$response["returnCode"] = 0;
-			$response["extraInfo"] = "FIELDS_MISSING";
+			$response["extraInfo"] = "INVALID_UN_PW";
+		}
+	}
+	else
+	{
+		$response["returnCode"] = 0;
+		$response["extraInfo"] = "FIELDS_MISSING";
 	}
 
 	echo json_encode($response);
