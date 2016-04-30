@@ -2,7 +2,7 @@
 
 	/*
 
-	Input: rollNo
+	Input: username
 	Input: password
 
 	Output: returnCode
@@ -12,14 +12,14 @@
 
 	$response = [];
 
-	if (isset($_POST["rollNo"]) && isset($_POST["password"]))
+	if (isset($_POST["username"]) && isset($_POST["password"]))
 	{
 		require_once 'dbConnection.php';
 
 		$dbCon = new dbConnection();
 		$con = $dbCon->con;
 
-		$result = mysqli_query($con, "SELECT * FROM users WHERE rollNo='$_POST[rollNo]' AND password='$_POST[password]'");
+		$result = mysqli_query($con, "SELECT * FROM users WHERE username='$_POST[username]' AND password='$_POST[password]'");
 
 		if (!$result)
 		{

@@ -6,7 +6,7 @@
 		ob_start();
 		require 'login.php';
 		$jsonVariables = json_decode(ob_get_clean());
-
+		
 		//Check for failure..
 		if ($jsonVariables->returnCode == 1)
 		{
@@ -72,7 +72,7 @@
 
 			<div id="loginModal" class="modal container" style="width: 25%">
 				<div class="modal-content">
-					<form method="post" class="col s4 pull-s2" action="echoPost.php">
+					<form method="post" class="col s4 pull-s2">
 						<div class="row">
 							<div class="input-field col s12">
 								<input name="username" id="username" type="text" class="validate" required="">
