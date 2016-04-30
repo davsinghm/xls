@@ -67,21 +67,25 @@
 			</div>
 		</div>
 
-		<img src="images/seeker.png" id="seeker" style="position: absolute;">
-
 		<script>
 			$(document).ready(function(){
 				$('#navbarTitle').html('Cross Language Scripting&nbsp;&nbsp; | &nbsp;&nbsp;<?php echo $jsonVariables->title; ?>');
 
-				var w = window.innerWidth, h = window.innerHeight;
+				w = window.innerWidth, h = window.innerHeight;
 				sbw = w * 0.7;
 				sbh = sbw / 20;
 				$('#seekbar').attr('width', sbw);
 				$('#seekbar').attr('height', sbh);
 
-				var ctx = document.getElementById("seekbar").getContext("2d");
+				speechFragments = [];
+				points = [];
+				seekerPosition = -1;
 
-				drawCanvas();
+				videoElement = document.getElementById('video');
+
+				seekbarClicked = false;
+
+				var ctx = document.getElementById("seekbar").getContext("2d");
 
 				var seekbar = document.getElementById('seekbar');
 				var seekbarWidth = seekbar.clientWidth;
@@ -89,51 +93,99 @@
 
 				$('#extraInfo').text(seekbarWidth + " " + seekbarHeight);
 
-				$('#seeker').css("height", seekbarHeight);
-				$('#seeker').css("top", $("#seekbar").offset().top + 'px');
 
-				$('#seeker').css("top", '-100px');
-
-				$("#seekbar").mousemove(function(event)
-				{
-					$('#seeker').css("top", $(this).offset().top + 'px');
-					$('#seeker').css("left", event.pageX + 'px');
-
-				    var progress = (event.pageX - $(this).offset().left)/seekbarWidth;
-
-				    var videoElement = document.getElementById('video');
-
-				    videoElement.currentTime = progress * videoElement.duration;
-
-				    $('#extraInfo').text(progress);
+				$("#seekbar").mousedown(function(event) {
+					seekbarClicked = true;
+					seekToPosition((event.pageX - $(this).offset().left)/seekbarWidth);
+				}).mousemove(function(event) {
+					if (!seekbarClicked)
+						return;
+					seekToPosition((event.pageX - $(this).offset().left)/seekbarWidth);
+				}).mouseup(function() {
+					seekbarClicked = false;
 				});
+
+				$(document).keydown(function(event) {
+					if (event.keyCode == 32)
+						toggleVideoPlayback();
+				});
+
+				$('#video').click(function() {
+					toggleVideoPlayback();
+				});
+
+				for (var i = 0; i < 500; i++)
+					points.push([i/500, Math.random()]);
+				var temp = 0.1;
+				for (var i = 0; i < 5; i++)
+				{
+					speechFragments.push([temp, temp + 0.05]);
+					temp += 0.1;
+				}
+
+				videoElement.addEventListener("timeupdate", videoProgressCallback);
+
+				drawCanvas();
 			});
+
+			function toggleVideoPlayback() {
+				if (videoElement.paused)
+					videoElement.play();
+				else
+					videoElement.pause();
+			};
+
+			function seekToPosition(position) {
+					seekerPosition = position;
+
+				    videoElement.currentTime = seekerPosition * videoElement.duration;
+
+				    $('#extraInfo').text(seekerPosition);
+				    drawCanvas();
+			}
+
+			function videoProgressCallback() {
+				console.log('zxc');
+					seekerPosition = videoElement.currentTime/videoElement.duration;
+
+				    $('#extraInfo').text(seekerPosition);
+				    drawCanvas();
+			}
 
 			function drawCanvas()
 			{
 				var ctx = document.getElementById("seekbar").getContext("2d");
 
-				ctx.fillStyle = "white";
+				ctx.fillStyle = "#000";
 				ctx.fillRect(0, 0, sbw, sbh);
 
 				ctx.fillStyle = "blue";
-				var points = [];
-				for (var i = 0; i < 100; i++)
-					points.push([i/100, Math.random()]);
 
 				ctx.beginPath();
 				ctx.moveTo (0, sbh);
 
 				for (var i = 0; i < points.length - 1; i++)
 				{
-					ctx.lineTo(points[i][0] * sbw, points[i][1] * sbh);
-					ctx.lineTo(points[i + 1][0] * sbw, points[i + 1][1] * sbh);
+					ctx.lineTo(points[i][0] * sbw, sbh - points[i][1] * sbh);
+					ctx.lineTo(points[i + 1][0] * sbw + 1, sbh - points[i + 1][1] * sbh);
+					ctx.lineTo(points[i + 1][0] * sbw + 1, sbh);
+
+					ctx.closePath();
+					ctx.fill();
+
+					ctx.beginPath();
+					ctx.moveTo(points[i + 1][0] * sbw, sbh);
+					ctx.lineTo(points[i + 1][0] * sbw, sbh - points[i + 1][1] * sbh);
 				}
 
-				ctx.moveTo (sbw, sbh);
 				ctx.closePath();
 
-				ctx.stroke();
+				ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
+				for (var i = 0; i < speechFragments.length; i++)
+					ctx.fillRect(speechFragments[i][0] * sbw, 0, (speechFragments[i][1] - speechFragments[i][0]) * sbw, sbh);
+
+				ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+				ctx.fillRect((seekerPosition - 0.0025) * sbw, 0, 0.005 * sbw, sbh);
 			}
 		</script>
 	</body>
