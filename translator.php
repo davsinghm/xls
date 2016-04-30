@@ -33,7 +33,6 @@
 
     <body>
 		<div id="flexContainer">
-
 			<div class="navbar-fixed">
 				<nav class="indigo">
 					<div class="container">
@@ -48,36 +47,94 @@
 				</nav>
 			</div>
 
-			<h3>
-				<?php echo $jsonVariables->title; ?>
-			</h3>
+			<div class="container">
+				<div class="col s12" style="text-align: center; margin-top: 2.5%">
+					<div class="row">
+						<video id="video" width="60%" poster="videos/<?php echo $_GET['id']; ?>thumbnail.png">
+							<source src="videos/<?php echo $_GET['id'].".".$jsonVariables->ext; ?>" type='video/<?php echo $jsonVariables->ext; ?>'>
+							Your browser does not support the video tag.
+						</video>
+					</div>
 
-			<video id="my-video" class="video-js" controls preload="auto" width="640" height="264" poster="MY_VIDEO_POSTER.jpg" data-setup="{}">
-				<source src="videos/<?php echo $_GET['id'].$jsonVariables->ext; ?>" type='video/mp4'>
-				<p class="vjs-no-js">
-				To view this video please enable JavaScript, and consider upgrading to a web browser that
-				<a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
-				</p>
-			</video>
+					<div class="row" style="margin-top: 2.5%;">
+						<canvas id="seekbar" width="1" height="1"></canvas>
+					</div>
+
+					<div id="extraInfo" style="position: absolute;">
+
+					</div>
+				</div>
+			</div>
 		</div>
+
+		<img src="images/seeker.png" id="seeker" style="position: absolute;">
 
 		<script>
 			$(document).ready(function(){
-				$('#loginLink').leanModal();
-				$('#registerLink').leanModal();
+				$('#navbarTitle').html('Cross Language Scripting&nbsp;&nbsp; | &nbsp;&nbsp;<?php echo $jsonVariables->title; ?>');
 
-				<?php
-					if (isset($_POST['login']))
-						echo 'Materialize.toast("Login Failed!", 4000)';
-					else if (isset($_POST['register']))
-					{
-						if ($jsonVariables->returnCode == 1)
-							echo 'Materialize.toast("Registration Successful!", 4000)';
-						else
-							echo 'Materialize.toast("Registration Failed!", 4000)';
-					}
-				?>
+				var w = window.innerWidth, h = window.innerHeight;
+				sbw = w * 0.7;
+				sbh = sbw / 20;
+				$('#seekbar').attr('width', sbw);
+				$('#seekbar').attr('height', sbh);
+
+				var ctx = document.getElementById("seekbar").getContext("2d");
+
+				drawCanvas();
+
+				var seekbar = document.getElementById('seekbar');
+				var seekbarWidth = seekbar.clientWidth;
+				var seekbarHeight = seekbar.clientHeight;
+
+				$('#extraInfo').text(seekbarWidth + " " + seekbarHeight);
+
+				$('#seeker').css("height", seekbarHeight);
+				$('#seeker').css("top", $("#seekbar").offset().top + 'px');
+
+				$('#seeker').css("top", '-100px');
+
+				$("#seekbar").mousemove(function(event)
+				{
+					$('#seeker').css("top", $(this).offset().top + 'px');
+					$('#seeker').css("left", event.pageX + 'px');
+
+				    var progress = (event.pageX - $(this).offset().left)/seekbarWidth;
+
+				    var videoElement = document.getElementById('video');
+
+				    videoElement.currentTime = progress * videoElement.duration;
+
+				    $('#extraInfo').text(progress);
+				});
 			});
+
+			function drawCanvas()
+			{
+				var ctx = document.getElementById("seekbar").getContext("2d");
+
+				ctx.fillStyle = "white";
+				ctx.fillRect(0, 0, sbw, sbh);
+
+				ctx.fillStyle = "blue";
+				var points = [];
+				for (var i = 0; i < 100; i++)
+					points.push([i/100, Math.random()]);
+
+				ctx.beginPath();
+				ctx.moveTo (0, sbh);
+
+				for (var i = 0; i < points.length - 1; i++)
+				{
+					ctx.lineTo(points[i][0] * sbw, points[i][1] * sbh);
+					ctx.lineTo(points[i + 1][0] * sbw, points[i + 1][1] * sbh);
+				}
+
+				ctx.moveTo (sbw, sbh);
+				ctx.closePath();
+
+				ctx.stroke();
+			}
 		</script>
 	</body>
 </html>
