@@ -6,11 +6,11 @@
 		ob_start();
 		require 'login.php';
 		$jsonVariables = json_decode(ob_get_clean());
-		
+
 		//Check for failure..
 		if ($jsonVariables->returnCode == 1)
 		{
-			$_SESSION['username'] = $jsonVariables->username;
+			$_SESSION["username"] = $_POST["username"];
 			header('Location: userHome.php');
 			die();
 		}
@@ -26,7 +26,7 @@
 
 <html>
     <head>
-        <title>Translators' Haven</title>
+        <title>Cross Language Scripting</title>
 
 		<link rel="stylesheet" href="css/materialize.icon.css"/>
 		<link rel="stylesheet" href="css/materialize.min.css"/>
@@ -44,7 +44,7 @@
 			<div class="navbar-fixed">
 				<nav class="indigo">
 					<div class="container">
-						<div style="display: inline;" id="navbarTitle">Tranlators' Haven</div>
+						<div style="display: inline;" id="navbarTitle">Cross Language Scripting</div>
 
 						<ul class="right" id="navbarLinks">
 							<li><a href="#">About Us</a></li>
