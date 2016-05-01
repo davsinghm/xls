@@ -47,29 +47,37 @@
 				</nav>
 			</div>
 
-			<div class="container">
-				<div class="col s12" style="text-align: center; margin-top: 2.5%">
-					<div class="row">
-						<video id="video" width="60%" poster="videos/<?php echo $_GET['id']; ?>thumbnail.png">
-							<source src="videos/<?php echo $_GET['id'].".".$jsonVariables->ext; ?>" type='video/<?php echo $jsonVariables->ext; ?>'>
-							Your browser does not support the video tag.
-						</video>
-					</div>
+			<div class="row">
+				<div class="col s7">
+					<video id="video" width="90%" poster="thumbs/<?php echo $_GET['id']; ?>.jpg" style="padding-left: 3.5%; padding-top: 4%;">
+						<source src="videos/<?php echo $_GET['id'].".".$jsonVariables->ext; ?>" type='video/<?php echo $jsonVariables->ext; ?>'>
+						Your browser does not support the video tag.
+					</video>
+				</div>
 
-					<div class="row" style="margin-top: 2.5%;">
-						<canvas id="seekbar" width="1" height="1"></canvas>
-					</div>
+				<div class="col s5" style="text-align: center; margin-top: 2.5%">
+					<input type="text" id="subtitlesInputBox" name="subtitlesInputBox">
 
+					<select name="activeLanguageInputBox" id="activeLanguageInputBox" style="display: block">
+						<option value="EN" selected="selected">EN</option>
+						<option value="HI">HI</option>
+						<option value="PA">PA</option>
+						<option value="TA">TA</option>
+					</select>
+
+					<a class="btn" onclick="saveSubtitles()">Save</a>
 				</div>
 			</div>
 		</div>
+
+		<canvas id="seekbar" width="1" height="1" style="position: fixed; bottom: 0px;"></canvas>
 
 		<script>
 			$(document).ready(function(){
 				$('#navbarTitle').html('Cross Language Scripting&nbsp;&nbsp; | &nbsp;&nbsp;<?php echo $jsonVariables->title; ?>');
 
 				w = window.innerWidth, h = window.innerHeight;
-				sbw = w * 0.7;
+				sbw = w;
 				sbh = sbw / 20;
 				$('#seekbar').attr('width', sbw);
 				$('#seekbar').attr('height', sbh);
@@ -82,6 +90,16 @@
 
 				seekbarClicked = false;
 
+				selectedFragment = 0, activeFragment = -1;
+
+				subtitles = {};
+				subtitles["EN"] = [];
+				subtitles["HI"] = [];
+				subtitles["PA"] = [];
+				subtitles["TA"] = [];
+
+				activeLanguage = "EN";
+
 				var ctx = document.getElementById("seekbar").getContext("2d");
 
 				var seekbar = document.getElementById('seekbar');
@@ -91,17 +109,35 @@
 				$("#seekbar").mousedown(function(event) {
 					seekbarClicked = true;
 					seekToPosition((event.pageX - $(this).offset().left)/seekbarWidth);
+
+					if (activeFragment != -1){
+						selectedFragment = activeFragment;
+						$('#subtitlesInputBox').val(subtitles[activeLanguage][activeFragment]);
+						console.log(selectedFragment);
+					}
 				}).mousemove(function(event) {
-					if (!seekbarClicked)
+					var normalized = (event.pageX - $(this).offset().left)/seekbarWidth;
+
+					if (!seekbarClicked) {
+						activeFragment = -1;
+						for (var i = 0; i < speechFragments.length; i++)
+							if (speechFragments[i][0] <= normalized && speechFragments[i][1] > normalized)
+								activeFragment = i;
 						return;
-					seekToPosition((event.pageX - $(this).offset().left)/seekbarWidth);
+					}
+
+					seekToPosition(normalized);
 				}).mouseup(function() {
 					seekbarClicked = false;
-				});
+				}).hover(function() {}, function() { activeFragment = -1; });
 
 				$(document).keydown(function(event) {
-					if (event.keyCode == 32)
+					if (event.keyCode == 32) // space
 						toggleVideoPlayback();
+					else if (event.keyCode == 37) // left
+						seekToPosition(seekerPosition - 0.01);
+					else if (event.keyCode == 39) // right
+						seekToPosition(seekerPosition + 0.01);
 				});
 
 				$('#video').click(function() {
@@ -113,16 +149,25 @@
 					samples.push([i/500, Math.random()]);
 				samples.push([1, 0]);
 
-				console.log("ASDF");
 				var speechFragmentsJson = "	<?php
 												ob_start();
 												require 'speechFragmentRetriever.php';
 												echo ob_get_clean(); ?>";
-				console.log(speechFragmentsJson);
 
 				speechFragments = JSON.parse(speechFragmentsJson);
 
+				for (var i = 0; i < speechFragments.length; i++) {
+					subtitles["EN"].push("");
+					subtitles["HI"].push("");
+					subtitles["PA"].push("");
+					subtitles["TA"].push("");
+				}
+
 				videoElement.addEventListener("timeupdate", videoProgressCallback);
+
+				$("#activeLanguageInputBox").change(function() {
+					activeLanguage = $('select[name="activeLanguageInputBox"]').val();
+				});
 
 				drawCanvas();
 			});
@@ -143,23 +188,48 @@
 			}
 
 			function videoProgressCallback() {
-				console.log('zxc');
-					seekerPosition = videoElement.currentTime/videoElement.duration;
+				seekerPosition = videoElement.currentTime/videoElement.duration;
 
-				    drawCanvas();
+			    drawCanvas();
 			}
 
 			function drawCanvas()
 			{
 				var ctx = document.getElementById("seekbar").getContext("2d");
 
-				ctx.fillStyle = "#000";
-				ctx.fillRect(0, 0, sbw, sbh);
+        		ctx.clearRect(0, 0, sbw, sbh);
+
+				ctx.shadowColor   = '#999999';
+				ctx.shadowOffsetX = 0;
+				ctx.shadowOffsetY = 0;
+				ctx.shadowBlur    = 8;
 
 				ctx.fillStyle = "blue";
 
+				var nextSpeechFragment = 0, insideSpeechFragment = false;
+				var seekerDrwaing = false;
+
 				for (var i = 0; i < samples.length - 1; i++)
 				{
+					if (insideSpeechFragment == false) {
+						if (nextSpeechFragment < speechFragments.length)
+							if (speechFragments[nextSpeechFragment][0] < samples[i][0]) {
+								insideSpeechFragment = true;
+								ctx.fillStyle = "red";
+							}
+					}
+					else if (samples[i][0] >= speechFragments[nextSpeechFragment][1]) {
+						nextSpeechFragment++;
+						ctx.fillStyle = "blue";
+						insideSpeechFragment = false;
+					}
+
+					seekerDrawing = false;
+					if (samples[i][0] >= (seekerPosition - 0.0025) && samples[i][0] < (seekerPosition + 0.0025)) {
+						ctx.fillStyle = "white";
+						seekerDrawing = true;
+					}
+
 					ctx.beginPath();
 
 					ctx.moveTo(samples[i][0] * sbw, sbh);
@@ -169,14 +239,21 @@
 
 					ctx.closePath();
 					ctx.fill();
+
+					if (seekerDrawing) {
+						if (insideSpeechFragment)
+							ctx.fillStyle = "red";
+						else
+							ctx.fillStyle = "blue";
+					}
 				}
+			}
 
-				ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
-				for (var i = 0; i < speechFragments.length; i++)
-					ctx.fillRect(speechFragments[i][0] * sbw, 0, (speechFragments[i][1] - speechFragments[i][0]) * sbw, sbh);
-
-				ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-				ctx.fillRect((seekerPosition - 0.0025) * sbw, 0, 0.005 * sbw, sbh);
+			function saveSubtitles()
+			{
+				subtitles[activeLanguage][selectedFragment] = $('#subtitlesInputBox').val();
+				console.log(activeLanguage);
+				console.log(subtitles[activeLanguage]);
 			}
 		</script>
 	</body>

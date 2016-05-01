@@ -60,7 +60,7 @@
 			<div class="container">
 				<div class="col s12" style="text-align: center; margin-top: 2.5%">
 					<div class="row">
-						<video id="video" width="60%" poster="videos/<?php echo $_GET['id']; ?>thumbnail.png">
+						<video id="video" width="60%" poster="thumbs/<?php echo $_GET['id']; ?>.jpg">
 							<source src="videos/<?php echo $_GET['id'].".".$jsonVariables->ext; ?>" type='video/<?php echo $jsonVariables->ext; ?>'>
 							Your browser does not support the video tag.
 						</video>
@@ -128,14 +128,8 @@
 							newFragmentStart = -1;
 							newFragmentEnd = -1;
 
-							speechFragments.sort(function(a, b) {
-								return a[0] < b[0];
-							});
-
 							drawCanvas();
 						}
-
-	            console.log(JSON.stringify(speechFragments));
 				});
 
 				$('#video').click(function() {
@@ -224,6 +218,8 @@
 	            var hiddenField = document.createElement("input");
 	            hiddenField.setAttribute("type", "hidden");
 	            hiddenField.setAttribute("name", "fragments");
+
+				speechFragments.sort(function(a, b) { return a[0] > b[0]; });
 	            hiddenField.setAttribute("value", JSON.stringify(speechFragments));
 
 	            form.appendChild(hiddenField);
