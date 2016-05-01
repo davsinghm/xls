@@ -1,4 +1,16 @@
 <?php
+	session_start();	
+?>
+
+<html>
+    
+    <?php include_once "header.php" ?>
+
+
+	<div class="mdl-grid">
+	        
+
+<?php
 	require_once 'dbConnection.php';
 
 	$dbCon = new dbConnection();
@@ -9,15 +21,35 @@
 	if ($result && mysqli_num_rows($result) != 0) {
 		$num = 0;
 		while($row = mysqli_fetch_assoc($result)) {
-			echo "<img width=200 src=\"thumbs/" . $row["Id"] . ".jpg\" />"; echo "<br />";
-			echo "<a href=\"translator.php?id=" . $row["Id"] . "\">" . $row["Title"] . "</a>";
-			echo "<br />";
-			echo $row["OrigLang"] . " | " . $row["Id"] . "." . $row["Ext"] . "<br />";
-			echo "langs: ";
-			foreach ($row["Languages"] as $value)
-    			echo $value . " ";
-			echo "<br /><br />";
-		}
-	}
-		
 ?>
+
+						<div class="mdl-cell mdl-cell--3-col">
+							<div class="demo-card-square mdl-card mdl-shadow--2dp" style="width: 250px; height: 250px;">
+						        <div class="mdl-card__title mdl-card--expand" style="color: #fff; background:
+								    url('./thumbs/<?php echo $row["Id"]; ?>.jpg') no-repeat; background-size:cover;">
+								    <!--h2 class="mdl-card__title-text">Update</h2-->
+								</div>
+								<div class="mdl-card__supporting-text">
+								    <?php echo $row["Title"]; ?>
+							    </div>
+						        <div class="mdl-card__actions mdl-card--border">
+						            <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
+						            	href=translater.php?id=<?php echo $row["Id"]; ?>>
+						                Translate
+						            </a>
+						        </div>
+						    </div>
+		    			</div>
+
+
+
+
+<?php
+		}
+	}		
+?>
+
+
+		    		</div>
+		    	<?php include_once "footer.php" ?>
+</html>

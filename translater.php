@@ -199,12 +199,12 @@
 
         		ctx.clearRect(0, 0, sbw, sbh);
 
-				ctx.shadowColor   = '#999999';
+				//ctx.shadowColor   = '#999999';
 				ctx.shadowOffsetX = 0;
 				ctx.shadowOffsetY = 0;
 				ctx.shadowBlur    = 8;
 
-				ctx.fillStyle = "blue";
+				ctx.fillStyle = '#EF6C00';
 
 				var nextSpeechFragment = 0, insideSpeechFragment = false;
 				var seekerDrwaing = false;
@@ -220,7 +220,7 @@
 					}
 					else if (samples[i][0] >= speechFragments[nextSpeechFragment][1]) {
 						nextSpeechFragment++;
-						ctx.fillStyle = "blue";
+						ctx.fillStyle = '#2196F3';
 						insideSpeechFragment = false;
 					}
 

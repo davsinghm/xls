@@ -11,7 +11,7 @@
 		if ($jsonVariables->returnCode == 1)
 		{
 			$_SESSION["username"] = $_POST["username"];
-			header('Location: userHome.php');
+			header('Location: videos.php');
 			die();
 		}
 	}
