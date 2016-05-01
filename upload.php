@@ -1,5 +1,33 @@
 <?php
 
+	function generateSamples($target_file) {
+    	$myfile = fopen("wave.dat", "r") or die();
+    	$dat = fopen("$target_file", "w") or die();
+
+    	$num = 1;
+		while(!feof($myfile)) {
+			$line = fgets($myfile);
+			if ($num > 2) {
+				$line = trim($line);
+				$line = explode("  ", $line);
+				$a = trim($line[1]) - 0;
+				if ($a < 0)
+					$a = 0;
+				$a *= 10;			
+				echo $a . " ";
+				if ($a < 0)
+					$a = 0;
+				fwrite($dat, $a . " ");
+				
+			}
+			$num++;
+		}
+		fclose($myfile);
+		fclose($dat);
+
+		return 0;
+	}
+
 	$response = [];
 
 	if (isset($_FILES["videoFile"]) && isset($_POST["title"]) && isset($_POST["orig_lang"])) {
@@ -20,6 +48,7 @@
 		$ext = pathinfo(basename($_FILES["videoFile"]["name"]), PATHINFO_EXTENSION);
 		$target_file = "videos/" . $id . "." . $ext;
 		$thumb_file = "thumbs/" . $id . ".jpg";
+		$samples_file = "samples/" . 88 . ".dat";
 		$uploadOk = 1;
 		
 		// Check if file already exists
@@ -33,10 +62,17 @@
 		    $uploadOk = 0;
 		}
 
-		$pwd = trim(shell_exec("pwd"));
 		if ($uploadOk != 0 && move_uploaded_file($_FILES["videoFile"]["tmp_name"], $target_file)) {
 			
-			shell_exec("$pwd/ffmpeg -i $pwd/$target_file -vf  \"thumbnail\" -frames:v 1 $pwd/$thumb_file -y");
+			shell_exec("/usr/local/bin/ffmpeg -i ./$target_file -vf  \"thumbnail\" -frames:v 1 ./$thumb_file -y");
+			//shell_exec("/usr/local/bin/sox ./wave.wav  -c 1 -r 100 ./wave.dat");
+
+			exec("/usr/local/bin/sox ./wave.wav -c 1 -r 10 ./wave.dat", $output, $return_var);
+			if (!$return_var && !generateSamples($samples_file)) {
+				//echo "success";
+			} 
+			//var_dump($output, $return_var);
+			//print_r($output);
 
 			$result = mysqli_query($con, "INSERT INTO videos(Title, Ext, OrigLang, Status, Languages) 
 				VALUES('$_POST[title]', '$ext', '$_POST[orig_lang]', '0', '')");
