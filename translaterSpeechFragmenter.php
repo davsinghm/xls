@@ -57,30 +57,28 @@
 				</nav>
 			</div>
 
-			<div class="container">
-				<div class="col s12" style="text-align: center; margin-top: 2.5%">
-					<div class="row">
-						<video id="video" width="60%" poster="thumbs/<?php echo $_GET['id']; ?>.jpg">
-							<source src="videos/<?php echo $_GET['id'].".".$jsonVariables->ext; ?>" type='video/<?php echo $jsonVariables->ext; ?>'>
-							Your browser does not support the video tag.
-						</video>
-					</div>
+			<div class="row">
+				<div class="col s7 push-s3">
+					<video id="video" width="90%" poster="thumbs/<?php echo $_GET['id']; ?>.jpg" style="padding-top: 3.5%;">
+						<source src="videos/<?php echo $_GET['id'].".".$jsonVariables->ext; ?>" type='video/<?php echo $jsonVariables->ext; ?>'>
+						Your browser does not support the video tag.
+					</video>
+				</div>
 
-					<div class="row" style="margin-top: 2.5%;">
-						<canvas id="seekbar" width="1" height="1"></canvas>
-					</div>
-
+				<div class="col s2 push-s3" style="margin-top: 36%">
 					<a onclick="sendData()" style="color: black" class="btn">Save Fragments</a>
 				</div>
 			</div>
 		</div>
+
+		<canvas id="seekbar" width="1" height="1" style="position: fixed; bottom: 0px;"></canvas>
 
 		<script>
 			$(document).ready(function(){
 				$('#navbarTitle').html('Cross Language Scripting&nbsp;&nbsp; | &nbsp;&nbsp;<?php echo $jsonVariables->title; ?>');
 
 				w = window.innerWidth, h = window.innerHeight;
-				sbw = w * 0.7;
+				sbw = w;
 				sbh = sbw / 20;
 				$('#seekbar').attr('width', sbw);
 				$('#seekbar').attr('height', sbh);
@@ -119,17 +117,21 @@
 						seekToPosition(seekerPosition - 0.01);
 					else if (event.keyCode == 39) // right
 						seekToPosition(seekerPosition + 0.01);
-					else if (event.keyCode == 219) // [
-						newFragmentStart = videoProgressN();
-					else if (event.keyCode == 221) // ]
-						if (newFragmentStart != -1 && newFragmentEnd > newFragmentStart)
-						{
-							speechFragments.push([newFragmentStart, newFragmentEnd]);
-							newFragmentStart = -1;
-							newFragmentEnd = -1;
-
+					else if (event.keyCode == 219) { // [
+						if (newFragmentStart == -1)
+							newFragmentStart = videoProgressN();
+						else {
+							newFragmentStart = newFragmentEnd = -1;
 							drawCanvas();
 						}
+					}
+					else if (event.keyCode == 221) { // ]
+						if (newFragmentStart != -1 && newFragmentEnd > newFragmentStart)
+							speechFragments.push([newFragmentStart, newFragmentEnd]);
+
+						newFragmentStart = newFragmentEnd = -1;
+						drawCanvas();
+					}
 				});
 
 				$('#video').click(function() {
@@ -180,13 +182,41 @@
 			{
 				var ctx = document.getElementById("seekbar").getContext("2d");
 
-				ctx.fillStyle = "#000";
-				ctx.fillRect(0, 0, sbw, sbh);
+				ctx.clearRect(0, 0, sbw, sbh);
 
-				ctx.fillStyle = "blue";
+				ctx.fillStyle = "#2196F3";
+
+				var nextSpeechFragment = 0, insideSpeechFragment = false;
+				var seekerDrwaing = false;
 
 				for (var i = 0; i < samples.length - 1; i++)
 				{
+					ctx.beginPath();
+					if (insideSpeechFragment == false) {
+						if (nextSpeechFragment < speechFragments.length)
+							if (speechFragments[nextSpeechFragment][0] < samples[i][0]) {
+								insideSpeechFragment = true;
+
+								ctx.fillStyle = "#EF6C00";
+							}
+					}
+					else if (samples[i][0] >= speechFragments[nextSpeechFragment][1]) {
+						nextSpeechFragment++;
+						ctx.fillStyle = "#2196F3";
+						insideSpeechFragment = false;
+					}
+
+					seekerDrawing = false;
+					if (newFragmentStart != -1 && newFragmentEnd > newFragmentStart && samples[i][0] >= (newFragmentStart) && samples[i][0] < (newFragmentEnd)) {
+						ctx.fillStyle = "red";
+						seekerDrawing = true;
+					}
+
+					if (samples[i][0] >= (seekerPosition - 0.0025) && samples[i][0] < (seekerPosition + 0.0025)) {
+						ctx.fillStyle = "green";
+						seekerDrawing = true;
+					}
+
 					ctx.beginPath();
 
 					ctx.moveTo(samples[i][0] * sbw, sbh);
@@ -196,17 +226,14 @@
 
 					ctx.closePath();
 					ctx.fill();
+
+					if (seekerDrawing) {
+						if (insideSpeechFragment)
+							ctx.fillStyle = "#EF6C00";
+						else
+							ctx.fillStyle = "#2196F3";
+					}
 				}
-
-				ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
-				for (var i = 0; i < speechFragments.length; i++)
-					ctx.fillRect(speechFragments[i][0] * sbw, 0, (speechFragments[i][1] - speechFragments[i][0]) * sbw, sbh);
-
-				ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-				ctx.fillRect((seekerPosition - 0.0025) * sbw, 0, 0.005 * sbw, sbh);
-
-				if (newFragmentStart != -1 && newFragmentEnd != -1)
-					ctx.fillRect(newFragmentStart * sbw, 0, (newFragmentEnd - newFragmentStart) * sbw, sbh);
 			}
 
 			function sendData()

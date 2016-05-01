@@ -97,6 +97,8 @@
 	    if ($uploadOk === 0) {
 	    	unlink($target_file);
 	    	unlink($thumb_file);
+	    	unlink("wave.dat");
+
 	    }
 		
 

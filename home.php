@@ -31,6 +31,7 @@
 		<link rel="stylesheet" href="css/materialize.icon.css"/>
 		<link rel="stylesheet" href="css/materialize.min.css"/>
 		<link rel="stylesheet" href="css/style.css"/>
+		<link rel="stylesheet" href="css/home.css"/>
 
 		<script src="js/jquery.js"></script>
 		<script src="js/materialize.min.js"></script>
